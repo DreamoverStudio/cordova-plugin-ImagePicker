@@ -4,7 +4,11 @@
 #import "UIImage+Luban_iOS_Extension_h.h"
 
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
-
+#define iOS7Later ([UIDevice currentDevice].systemVersion.floatValue >= 7.0f)
+#define iOS8Later ([UIDevice currentDevice].systemVersion.floatValue >= 8.0f)
+#define iOS9Later ([UIDevice currentDevice].systemVersion.floatValue >= 9.0f)
+#define iOS9_1Later ([UIDevice currentDevice].systemVersion.floatValue >= 9.1f)
+#define iOS11Later ([UIDevice currentDevice].systemVersion.floatValue >= 11.0f)
 @interface ImagePicker ()<TZImagePickerControllerDelegate,UIImagePickerControllerDelegate,UIAlertViewDelegate,UINavigationControllerDelegate> {
     NSMutableArray *_selectedPhotos;
     NSMutableArray *_selectedAssets;
@@ -147,16 +151,31 @@
             if(isSelectOriginalPhoto) {
                 __block NSMutableArray *pathsArr = [[NSMutableArray alloc] init];
                 
-                [self saveOriginalImage:assets currentIdx:0 originalPathArray:pathsArr completion:^(NSMutableArray *paths) {
+//                [self saveOriginalImage:assets currentIdx:0 originalPathArray:pathsArr completion:^(NSMutableArray *paths) {
+//
+//                    NSLog(@"All finished.");
+//
+//                    NSDictionary* result = @{@"images": paths, @"isOrigin": @(YES)};
+//
+//                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
+//
+//                    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+//
+//                    _isSelectOriginalPhoto = FALSE;
+//                }];
+                // 原图无法显示heic by jianhui
+                __block int quality = (int)self.quality;
+                self.quality = 100;
+                [self saveCompressImage:assets currentIdx:0 compressedPathArray:pathsArr completion:^(NSMutableArray *paths) {
                     
                     NSLog(@"All finished.");
                     
-                    NSDictionary* result = @{@"images": paths, @"isOrigin": @(YES)};
+                    NSDictionary* result = @{@"images": paths, @"isOrigin": @(NO)};
                     
                     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
                     
                     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-                    
+                    self.quality = quality;
                     _isSelectOriginalPhoto = FALSE;
                 }];
             }
